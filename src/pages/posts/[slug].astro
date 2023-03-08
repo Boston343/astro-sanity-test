@@ -1,6 +1,8 @@
 ---
 import { useSanityClient } from "astro-sanity";
 import PortableText from "../../components/PortableText.astro";
+import { urlForImage } from "../../sanity/urlForImage";
+import { formatBlogPostDate } from "../../utils/helpers";
 
 export async function getStaticPaths() {
   const posts = await useSanityClient().fetch(`*[_type == "post"]`);
@@ -16,13 +18,31 @@ export async function getStaticPaths() {
 }
 
 const { slug } = Astro.params;
-const { title, body } = Astro.props;
+const { title, description, body, mainImage, publishedAt, author } =
+  Astro.props;
 console.log(Astro.props);
+
+// TODO: pass SEO into a layout which updates the header info
+const seo = {
+  title: title,
+  description: description,
+  image: urlForImage(mainImage).width(1200).url(),
+};
 
 // console.log("slug: " + slug);
 ---
 
-<h1>{title}</h1>
+<h1>Title: {title}</h1>
+
+<h2>Description: {description}</h2>
+
+<!-- TODO: optimize image -->
+<img width="1000" src={seo.image} alt="Blog Post Image" />
+
+<time>Published {formatBlogPostDate(publishedAt)}</time>
+
+<!-- note the below doesn't work -->
+<!-- {author && <p>By {author.name}</p>} -->
 
 <PortableText portableText={body} />
 
